@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "life"
+require "io/console"
+
+unless ARGV[0]
+  warn "usage:\n#{$PROGRAM_NAME} inputfile\n#{$PROGRAM_NAME} -"
+  exit(-1)
+end
+
+file = ARGV[0] == "-" ? $stdin : File.open(ARGV[0])
+
+begin
+  gen = Life::Importer.new.import(file.read)
+rescue Life::Error
+  warn "The file format is invalid."
+  exit(-1)
+end
+
+presenter = Life::Presenter.new
+loop do
+  puts presenter.represent(gen)
+  puts "Press any key to advance to next gen, or Q to exit"
+
+  key = $stdin.getch
+  break if key.downcase == "q"
+
+  gen = gen.next_step
+end
